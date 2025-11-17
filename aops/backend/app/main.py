@@ -31,7 +31,7 @@ async def lifespan(app: FastAPI):
     
     try:
         # Initialize services
-        mongo_uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017")
+        mongo_uri = os.getenv("MONGODB_URI","mongodb+srv://pscode:prath%40123@movie.xvphk1n.mongodb.net/?retryWrites=true&w=majority&appName=movie")
         db = await init_db(mongo_uri)
         
         init_pdf_service(output_dir="./uploads/pdfs")

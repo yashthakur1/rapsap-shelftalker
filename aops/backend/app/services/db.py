@@ -21,7 +21,8 @@ class DatabaseService:
         Args:
             mongo_uri: MongoDB connection string. Defaults to env var or local MongoDB.
         """
-        self.mongo_uri = mongo_uri or os.getenv("MONGODB_URI", "mongodb://localhost:27017")
+        self.mongo_uri = mongo_uri or os.getenv("MONGODB_URI")
+        print(f"DatabaseService initialized with URI: {self.mongo_uri}")
         self.client: Optional[AsyncIOMotorClient] = None
         self.db: Optional[Any] = None
 
@@ -30,6 +31,7 @@ class DatabaseService:
         try:
             self.client = AsyncIOMotorClient(self.mongo_uri)
             self.db = self.client.aops_db
+            print("✓ MongoDB client created",{self.mongo_uri})
             
             # Create indexes for better query performance
             await self._create_indexes()
