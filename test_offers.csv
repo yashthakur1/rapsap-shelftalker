@@ -1,0 +1,3 @@
+product_id,product_name,brand,offer_type,offer_details,price,mrp,valid_till
+TEST-001,Test Product,TestBrand,Discount,50% off,1000,2000,2025-12-31
+TEST-002,Another Product,AnotherBrand,Sale,Special offer,500,750,2025-12-25
