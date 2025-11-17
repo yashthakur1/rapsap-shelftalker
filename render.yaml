@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: aops-frontend
+    env: static
+    buildCommand: cd aops/frontend && npm install && npm run build
+    staticPublishPath: ./aops/frontend/dist
+    routes:
+      - path: /
+        destination: /index.html
