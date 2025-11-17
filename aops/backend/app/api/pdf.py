@@ -142,6 +142,13 @@ async def preview_pdf(
         # Fetch template
         template = await db.get_template_by_id(template_id)
         if not template:
+            try:
+                tmpl = await db.db.templates.find_one({"id": template_id})
+                if tmpl:
+                    template = tmpl
+            except Exception:
+                template = None
+        if not template:
             raise HTTPException(status_code=404, detail="Template not found")
 
         # Determine layout options (use template defaults when not provided)

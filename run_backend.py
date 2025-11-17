@@ -20,15 +20,24 @@ if __name__ == "__main__":
     print("AOPS Backend Server")
     print("=" * 50)
     print(f"Working directory: {os.getcwd()}")
-    print(f"Starting on http://127.0.0.1:8001")
-    print(f"API Docs: http://127.0.0.1:8001/docs")
+    # Allow platform (Render, Docker, etc.) to control host and port via environment variables
+    host = os.environ.get('HOST', '0.0.0.0')
+    port = int(os.environ.get('PORT', os.environ.get('UVICORN_PORT', 8000)))
+    print(f"Starting on http://{host}:{port}")
+    print(f"API Docs: http://{host}:{port}/docs")
     print("=" * 50)
     print()
     
+    # Ensure uploads directory exists to avoid static mount warnings
+    try:
+        os.makedirs(os.path.join(os.getcwd(), 'uploads'), exist_ok=True)
+    except Exception:
+        pass
+
     uvicorn.run(
         "app.main:app",
-        host="127.0.0.1",
-        port=8000,
+        host=host,
+        port=port,
         reload=False,
         log_level="info"
     )
