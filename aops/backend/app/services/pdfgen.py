@@ -85,6 +85,10 @@ class PDFGeneratorService:
                 return None
 
             chrome_path = _find_chrome_executable()
+            if chrome_path:
+                print(f"→ Using existing Chrome executable: {chrome_path}")
+            else:
+                print("→ No system Chrome found — pyppeteer will download a Chromium binary (first run only).")
 
             launch_kwargs = {"headless": True, "args": ["--no-sandbox"]}
             if chrome_path:
