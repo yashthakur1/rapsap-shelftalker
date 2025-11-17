@@ -60,3 +60,7 @@ build/
 .env.local
 .env.*.local
 *.pem
+
+# AI Agent Instructions
+.github/copilot-instructions.md
+
