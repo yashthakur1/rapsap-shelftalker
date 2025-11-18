@@ -240,8 +240,16 @@ try:
         uploads_base = os.path.join(backend_dir, "uploads")
     
     if os.path.isdir(uploads_base):
+        print(f"✓ Mounting /downloads → {uploads_base}")
         app.mount("/downloads", StaticFiles(directory=uploads_base), name="downloads")
-        print(f"✓ Mounted /downloads → {uploads_base}")
+        # List what's in there for debugging
+        try:
+            pdfs_dir = os.path.join(uploads_base, "pdfs")
+            if os.path.isdir(pdfs_dir):
+                pdf_files = os.listdir(pdfs_dir)[:3]
+                print(f"  Sample PDFs: {pdf_files}")
+        except Exception as e:
+            print(f"  Warning listing PDFs: {e}")
     else:
         print(f"⚠ Uploads directory not found: {uploads_base}")
 except Exception as e:
