@@ -35,8 +35,11 @@ async def lifespan(app: FastAPI):
         mongo_uri = os.getenv("MONGODB_URI","mongodb+srv://pscode:prath%40123@movie.xvphk1n.mongodb.net/?retryWrites=true&w=majority&appName=movie")
         db = await init_db(mongo_uri)
         
-        init_pdf_service(output_dir="./uploads/pdfs")
-        init_storage_service(base_dir="./uploads")
+        # Use absolute path for uploads directory (important for Render persistent disk)
+        uploads_base = os.getenv("UPLOADS_PATH", os.path.abspath(os.path.join(os.getcwd(), "uploads")))
+        
+        init_pdf_service(output_dir=os.path.join(uploads_base, "pdfs"))
+        init_storage_service(base_dir=uploads_base)
         
         # Initialize preset templates
         await initialize_preset_templates(db)

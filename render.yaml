@@ -12,6 +12,8 @@ services:
         value: production
       - key: DEBUG
         value: "false"
+      - key: UPLOADS_PATH
+        value: /opt/render/project/aops/backend/uploads
     disk:
       - name: uploads
         mountPath: /opt/render/project/aops/backend/uploads
