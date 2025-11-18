@@ -36,7 +36,17 @@ async def lifespan(app: FastAPI):
         db = await init_db(mongo_uri)
         
         # Use absolute path for uploads directory (important for Render persistent disk)
-        uploads_base = os.getenv("UPLOADS_PATH", os.path.abspath(os.path.join(os.getcwd(), "uploads")))
+        # On Render with persistent disk at /opt/render/project/aops/backend/uploads
+        # We need to resolve the correct path
+        if os.getenv("UPLOADS_PATH"):
+            uploads_base = os.getenv("UPLOADS_PATH")
+        else:
+            # Fallback: construct path relative to the app directory
+            app_dir = os.path.dirname(os.path.abspath(__file__))  # .../aops/backend/app
+            backend_dir = os.path.dirname(app_dir)  # .../aops/backend
+            uploads_base = os.path.join(backend_dir, "uploads")
+        
+        print(f"→ Uploads base directory: {uploads_base}")
         
         init_pdf_service(output_dir=os.path.join(uploads_base, "pdfs"))
         init_storage_service(base_dir=uploads_base)
@@ -183,10 +193,57 @@ async def debug_logos():
         return {"status": "error", "error": str(e)}
 
 
+@app.get("/_debug/uploads")
+async def debug_uploads():
+    """Debug endpoint: list uploads (PDFs, CSV, templates)"""
+    try:
+        if os.getenv("UPLOADS_PATH"):
+            uploads_base = os.getenv("UPLOADS_PATH")
+        else:
+            app_dir = os.path.dirname(os.path.abspath(__file__))  # .../aops/backend/app
+            backend_dir = os.path.dirname(app_dir)  # .../aops/backend
+            uploads_base = os.path.join(backend_dir, "uploads")
+        
+        result = {
+            "status": "ok",
+            "uploads_path": uploads_base,
+            "exists": os.path.isdir(uploads_base),
+            "subdirs": {}
+        }
+        if os.path.isdir(uploads_base):
+            for subdir in ["pdfs", "csv", "templates"]:
+                subpath = os.path.join(uploads_base, subdir)
+                if os.path.isdir(subpath):
+                    files = []
+                    try:
+                        for fn in sorted(os.listdir(subpath))[-5:]:  # Last 5 files
+                            fp = os.path.join(subpath, fn)
+                            if os.path.isfile(fp):
+                                files.append({"name": fn, "size": os.path.getsize(fp)})
+                    except Exception as e:
+                        files.append({"error": str(e)})
+                    result["subdirs"][subdir] = files
+        return result
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+
 # Static file serving for PDFs and logos
+# Use consistent absolute paths
 try:
-    uploads_dir = os.path.abspath(os.path.join(os.getcwd(), "uploads"))
-    app.mount("/downloads", StaticFiles(directory=uploads_dir), name="downloads")
+    if os.getenv("UPLOADS_PATH"):
+        uploads_base = os.getenv("UPLOADS_PATH")
+    else:
+        # Construct path relative to app directory (this file's location)
+        app_dir = os.path.dirname(os.path.abspath(__file__))  # .../aops/backend/app
+        backend_dir = os.path.dirname(app_dir)  # .../aops/backend
+        uploads_base = os.path.join(backend_dir, "uploads")
+    
+    if os.path.isdir(uploads_base):
+        app.mount("/downloads", StaticFiles(directory=uploads_base), name="downloads")
+        print(f"✓ Mounted /downloads → {uploads_base}")
+    else:
+        print(f"⚠ Uploads directory not found: {uploads_base}")
 except Exception as e:
     print(f"⚠ Static file mounting warning: {e}")
 
