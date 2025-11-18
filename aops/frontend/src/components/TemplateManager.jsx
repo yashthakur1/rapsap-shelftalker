@@ -25,7 +25,8 @@ export default function TemplateManager({ onTemplateSelect, selectedOffers = [],
 
   const loadBrands = async () => {
     try {
-      const response = await fetch('http://localhost:8000/branding');
+      const brandUrl = `${API_BASE}/branding`;
+      const response = await fetch(brandUrl);
       const data = await response.json();
       setBrands(data.brands || []);
       // Default to first brand if available and not already selected
