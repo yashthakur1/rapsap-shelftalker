@@ -3,7 +3,7 @@ PDF Generation API routes.
 Handles PDF generation and rendering.
 """
 
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import APIRouter, HTTPException, Body, Request
 from typing import List
 from datetime import datetime
 
@@ -16,9 +16,11 @@ router = APIRouter(prefix="/pdf", tags=["pdf"])
 
 @router.post("/generate")
 async def generate_pdf(
+    request: Request,
     offer_ids: List[str] = Body(..., embed=False),
     template_id: str = Body(...),
-    layout_options: dict = Body(default=None)
+    layout_options: dict = Body(default=None),
+    branding: dict = Body(default=None)
 ):
     """
     Generate PDF with selected offers using specified template.
@@ -72,6 +74,12 @@ async def generate_pdf(
             "orientation": "portrait"
         })
         
+        # If branding was provided inside layout_options (frontend may send it there),
+        # prefer that when explicit `branding` argument is not provided.
+        if not branding and isinstance(layout_options, dict):
+            possible = layout_options.get("branding")
+            if possible and isinstance(possible, dict):
+                branding = possible
         # Get template HTML content
         template_html = template.get("html_content")
         if not template_html and template.get("file_path"):
@@ -92,10 +100,22 @@ async def generate_pdf(
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_filename = f"offers_{timestamp}.pdf"
         
+        # Normalize branding logo URL to absolute so headless Chrome can fetch it
+        print(f"→ generate_pdf branding before normalize: {branding}")
+        if branding and isinstance(branding, dict):
+            logo = branding.get("logo_url")
+            if logo and isinstance(logo, str) and logo.startswith("/"):
+                from urllib.parse import quote
+                base = str(request.base_url).rstrip('/')
+                abs_url = f"{base}{logo}"
+                branding["logo_url"] = quote(abs_url, safe=":/?#[]@!$&'()*+,;=%")
+        print(f"→ generate_pdf branding after normalize: {branding}")
+
         pdf_path = await pdf_service.generate_batch_pdf(
             offers=offers,
             template_html=template_html,
             layout_options=layout_options,
+            branding=branding,
             output_filename=output_filename
         )
         
@@ -122,6 +142,7 @@ async def generate_pdf(
 
 @router.post("/preview")
 async def preview_pdf(
+    request: Request,
     offer_ids: List[str] = Body(..., embed=False),
     template_id: str = Body(...),
     layout_options: dict = Body(default=None)
@@ -165,13 +186,23 @@ async def preview_pdf(
 
         # Render preview with the same context as PDF generation so width/height are honored
         template_html = template.get("html_content", "")
+        # Build absolute logo url in branding so preview iframe loads the image correctly
+        branding = layout_options.get("branding", {}) if isinstance(layout_options, dict) else {}
+        if branding and isinstance(branding, dict):
+            logo = branding.get("logo_url")
+            if logo and isinstance(logo, str) and logo.startswith("/"):
+                from urllib.parse import quote
+                base = str(request.base_url).rstrip('/')
+                branding["logo_url"] = quote(f"{base}{logo}", safe=":/?#[]@!$&'()*+,;=%")
+
         context = {
             "offers": offers,
             "layout": layout_options,
             "total_offers": len(offers),
             "page_size_css": page_size_info["css"],
             "label_width": page_size_info["label_width"],
-            "label_height": page_size_info["label_height"]
+            "label_height": page_size_info["label_height"],
+            "branding": branding
         }
         html_preview = pdf_service.render_template(template_html, context)
         

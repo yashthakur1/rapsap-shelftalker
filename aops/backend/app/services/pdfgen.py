@@ -243,6 +243,7 @@ class PDFGeneratorService:
         offers: list, 
         template_html: str,
         layout_options: dict = None,
+        branding: dict = None,
         output_filename: str = "offers_batch.pdf"
     ) -> str:
         """
@@ -252,6 +253,7 @@ class PDFGeneratorService:
             offers: List of offer dictionaries
             template_html: HTML template with Jinja2 syntax
             layout_options: Layout configuration (pageSize, perPage, etc.)
+            branding: Brand configuration (logo, colors, fonts)
             output_filename: Output PDF filename
             
         Returns:
@@ -272,7 +274,8 @@ class PDFGeneratorService:
                 "total_offers": len(offers),
                 "page_size_css": page_size_info["css"],
                 "label_width": page_size_info["label_width"],
-                "label_height": page_size_info["label_height"]
+                "label_height": page_size_info["label_height"],
+                "branding": branding or {}
             }
             
             # Render template with offers

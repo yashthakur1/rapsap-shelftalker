@@ -31,7 +31,7 @@ PRESET_SHELF_TALKER_BRANDED_HTML = """
         }
 
         body {
-            font-family: 'Arial', 'Helvetica', sans-serif;
+            font-family: {{ branding.fonts.body if branding.fonts else "'Arial'" }}, 'Helvetica', sans-serif;
             background: #ffffff;
             color: #111;
             display: flex;
@@ -76,7 +76,7 @@ PRESET_SHELF_TALKER_BRANDED_HTML = """
 
         .brand-section {
             flex: 0 0 34%;
-            background: #0033cc;
+            background: linear-gradient(180deg, {{ branding.colors.primary if branding.colors else "#5074F3" }} 0%, {{ branding.colors.accent if branding.colors else "#2F448D" }} 100%);
             color: white;
             display: flex;
             flex-direction: column;
@@ -127,6 +127,14 @@ PRESET_SHELF_TALKER_BRANDED_HTML = """
             letter-spacing: 0.5px;
             font-style: italic;
             text-transform: uppercase;
+            font-family: {{ branding.fonts.heading if branding.fonts else "'Barlow Condensed'" }}, Arial, sans-serif;
+        }
+
+        .brand-logo-img {
+        margin-top: -15px;
+            width: 120px;
+            height: 60px;
+            object-fit: contain;
         }
 
         .discount-badge {
@@ -163,14 +171,22 @@ PRESET_SHELF_TALKER_BRANDED_HTML = """
         <div class="shelf-wrapper">
             <div class="left-section">
                 <div class="product-name">{{ offer.product_name }}</div>
-                <div class="product-details">{{ offer.brand }} {{ offer.offer_details }}</div>
+                <div class="product-details">{% if not branding.logo_url %}{{ offer.brand }} {% endif %}{{ offer.offer_details }}</div>
                 <div class="price-row">
                     <div class="price-main"><span class="rupee">₹</span>{{ (offer.mrp - offer.price)|int }}<sup style="font-size:9pt">OFF</sup></div>
                     <div class="price-label">ON MRP</div>
                 </div>
             </div>
             <div class="brand-section">
+                {% if branding.logo_url %}
+                {% if 'svg' in (branding.logo_url | lower) %}
+                <img src="{{ branding.logo_url }}" alt="Brand Logo" class="brand-logo-img" style="filter: brightness(0) invert(1);" />
+                {% else %}
+                <img src="{{ branding.logo_url }}" alt="Brand Logo" class="brand-logo-img" />
+                {% endif %}
+                {% else %}
                 <div class="brand-logo">{{ (offer.brand|upper) if offer.brand else 'LOYAL' }}</div>
+                {% endif %}
                 {% if offer.mrp and offer.price %}
                 <div class="discount-badge">{{ ((offer.mrp - offer.price) / offer.mrp * 100)|int }}%</div>
                 <div class="discount-label">additional savings</div>

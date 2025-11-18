@@ -6,7 +6,7 @@ import { generatePDF, fetchTemplateById } from '../services/api';
  * PDFGenerator Component
  * Handles PDF generation and download
  */
-export default function PDFGenerator({ selectedOffers, selectedTemplate }) {
+export default function PDFGenerator({ selectedOffers, selectedTemplate, selectedBrand }) {
   const [loading, setLoading] = useState(false);
   const [generatedPDF, setGeneratedPDF] = useState(null);
   
@@ -50,6 +50,12 @@ export default function PDFGenerator({ selectedOffers, selectedTemplate }) {
         layoutOptionsToUse = layoutOptionsToUse
           ? { ...layoutOptionsToUse, ...storedLayoutOptions }
           : { ...storedLayoutOptions };
+      }
+      
+      // Inject branding if selected
+      if (selectedBrand) {
+        layoutOptionsToUse = layoutOptionsToUse || {};
+        layoutOptionsToUse.branding = selectedBrand;
       }
 
       const response = await generatePDF(

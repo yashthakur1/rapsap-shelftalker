@@ -15,6 +15,7 @@ from app.services.db import init_db, get_db
 from app.services.pdfgen import init_pdf_service
 from app.services.storage import init_storage_service
 from app.models.template import Template as TemplateModel
+from app.config.branding import get_available_brands, get_brand_config, BRAND_CONFIGS
 
 
 # Lifecycle management
@@ -65,11 +66,9 @@ async def lifespan(app: FastAPI):
 async def initialize_preset_templates(db):
     """Initialize preset templates in database if they don't exist"""
     try:
-        from app.templates.preset_minimal import PRESET_MINIMAL_HTML
-        from app.templates.preset_promo import PRESET_PROMO_HTML
-        from app.templates.preset_multi import PRESET_MULTI_HTML
         from app.templates.preset_shelf_talker_minimal import PRESET_SHELF_TALKER_MINIMAL
         from app.templates.preset_shelf_talker_branded import PRESET_SHELF_TALKER_BRANDED
+        from app.templates.preset_shelf_talker_loyal import PRESET_SHELF_TALKER_LOYAL
         
         # Delete all existing preset templates to ensure fresh initialization
         existing = await db.get_preset_templates()
@@ -81,50 +80,9 @@ async def initialize_preset_templates(db):
             print("✓ Cleared old presets")
         
         templates_to_create = [
-            {
-                "name": "Minimal Clean",
-                "description": "Simple, modern design with 4 columns per page",
-                "is_preset": True,
-                "html_content": PRESET_MINIMAL_HTML,
-                "css_content": None,
-                "layout_options": {
-                    "pageSize": "A4",
-                    "perPage": 24,
-                    "orientation": "portrait"
-                },
-                "created_at": datetime.utcnow(),
-                "updated_at": datetime.utcnow()
-            },
-            {
-                "name": "Promotional Bold",
-                "description": "Eye-catching promotional design with vibrant colors",
-                "is_preset": True,
-                "html_content": PRESET_PROMO_HTML,
-                "css_content": None,
-                "layout_options": {
-                    "pageSize": "A4",
-                    "perPage": 24,
-                    "orientation": "portrait"
-                },
-                "created_at": datetime.utcnow(),
-                "updated_at": datetime.utcnow()
-            },
-            {
-                "name": "Detailed Multi-Column",
-                "description": "Detailed design with pricing breakdown in 2 columns",
-                "is_preset": True,
-                "html_content": PRESET_MULTI_HTML,
-                "css_content": None,
-                "layout_options": {
-                    "pageSize": "A4",
-                    "perPage": 24,
-                    "orientation": "portrait"
-                },
-                "created_at": datetime.utcnow(),
-                "updated_at": datetime.utcnow()
-            },
             PRESET_SHELF_TALKER_MINIMAL,
-            PRESET_SHELF_TALKER_BRANDED
+            PRESET_SHELF_TALKER_BRANDED,
+            PRESET_SHELF_TALKER_LOYAL
         ]
         
         for template in templates_to_create:
@@ -186,17 +144,55 @@ async def root():
             "offers": "/docs#/offers",
             "templates": "/docs#/templates",
             "pdf": "/docs#/pdf",
-            "health": "/health"
+            "health": "/health",
+            "branding": "/branding"
         },
         "docs": "/docs"
     }
 
 
-# Static file serving for PDFs
+@app.get("/branding")
+async def get_branding():
+    """Get available branding configurations"""
+    # Return full brand configurations directly so frontend receives complete objects
+    try:
+        brands = list(BRAND_CONFIGS.values())
+        return {"status": "success", "brands": brands}
+    except Exception:
+        # Fallback to legacy method
+        brands = get_available_brands()
+        return {"status": "success", "brands": [get_brand_config(b) for b in brands]}
+
+
+@app.get("/_debug/logos")
+async def debug_logos():
+    """Debug endpoint: list logo files visible to the server"""
+    try:
+        import os
+        base = os.path.abspath(os.path.join(os.getcwd(), "app", "logos"))
+        files = []
+        if os.path.isdir(base):
+            for fn in sorted(os.listdir(base)):
+                fp = os.path.join(base, fn)
+                files.append({"name": fn, "size": os.path.getsize(fp), "path": fp})
+        return {"status": "ok", "dir": base, "files": files}
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+
+# Static file serving for PDFs and logos
 try:
-    app.mount("/downloads", StaticFiles(directory="./uploads"), name="downloads")
+    uploads_dir = os.path.abspath(os.path.join(os.getcwd(), "uploads"))
+    app.mount("/downloads", StaticFiles(directory=uploads_dir), name="downloads")
 except Exception as e:
     print(f"⚠ Static file mounting warning: {e}")
+
+try:
+    # Use absolute path to the logos directory relative to this module
+    logos_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "logos"))
+    app.mount("/logos", StaticFiles(directory=logos_dir), name="logos")
+except Exception as e:
+    print(f"⚠ Logo static file mounting warning: {e}")
 
 
 if __name__ == "__main__":

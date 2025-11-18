@@ -6,19 +6,36 @@ import { fetchTemplates, uploadTemplate, fetchOffers, previewPDF, updateTemplate
  * TemplateManager Component
  * Handles template selection and custom template uploads
  */
-export default function TemplateManager({ onTemplateSelect, selectedOffers = [] }) {
+export default function TemplateManager({ onTemplateSelect, selectedOffers = [], selectedBrand, onBrandSelect }) {
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [previewHtml, setPreviewHtml] = useState('');
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [brands, setBrands] = useState([]);
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
   const iframeRef = useRef(null);
 
   // Load templates on mount
   useEffect(() => {
     loadTemplates();
+    loadBrands();
   }, []);
+
+  const loadBrands = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/branding');
+      const data = await response.json();
+      setBrands(data.brands || []);
+      // Default to first brand if available and not already selected
+      if (data.brands && data.brands.length > 0 && !selectedBrand) {
+        if (onBrandSelect) onBrandSelect(data.brands[0]);
+      }
+    } catch (error) {
+      console.error('Failed to load brands:', error);
+    }
+  };
 
   const loadTemplates = async () => {
     setLoading(true);
@@ -97,7 +114,13 @@ export default function TemplateManager({ onTemplateSelect, selectedOffers = [] 
       try {
         setPreviewLoading(true);
         const template = templates.find((t) => (t.id || t._id) === selectedTemplate);
-        const layoutOptions = template?.layout_options || null;
+        const layoutOptions = template?.layout_options || {};
+        
+        // Inject branding into layout options
+        if (selectedBrand) {
+          layoutOptions.branding = selectedBrand;
+        }
+        
         const resp = await previewPDF([firstOfferId], selectedTemplate, layoutOptions);
         setPreviewHtml(resp.html_preview || '');
       } catch (err) {
@@ -110,7 +133,7 @@ export default function TemplateManager({ onTemplateSelect, selectedOffers = [] 
     };
 
     doPreview();
-  }, [selectedTemplate, selectedOffers, templates]);
+  }, [selectedTemplate, selectedOffers, templates, selectedBrand]);
 
   // Listen for size messages from iframe preview and apply height
   useEffect(() => {
@@ -196,6 +219,89 @@ export default function TemplateManager({ onTemplateSelect, selectedOffers = [] 
                         })()}
                       </div>
                     )}
+                    
+                    {/* Branding Selection */}
+                    {brands.length > 0 && (
+                      <div className="mt-4">
+                        <label className="block text-xs font-semibold text-gray-700 mb-2">
+                          Brand Selection:
+                        </label>
+                        <select
+                          value={selectedBrand?.id || ''}
+                          onChange={(e) => {
+                            const brand = brands.find(b => b.id === e.target.value);
+                            if (onBrandSelect) onBrandSelect(brand);
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none text-sm"
+                        >
+                          {brands.map((brand) => (
+                            <option key={brand.id} value={brand.id}>
+                              {brand.name}
+                            </option>
+                          ))}
+                        </select>
+                        {selectedBrand && (
+                          <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                            {/* Logo Preview */}
+                            {selectedBrand.logo_url && (
+                              <div className="mb-3 pb-3 border-b border-gray-300">
+                                <span className="text-xs font-semibold text-gray-700 block mb-2">Logo Preview:</span>
+                                <div className="bg-gradient-to-r from-blue-500 to-blue-700 p-3 rounded flex items-center justify-center" style={{
+                                  background: `linear-gradient(180deg, ${selectedBrand.colors?.primary || '#5074F3'} 0%, ${selectedBrand.colors?.accent || '#2F448D'} 100%)`
+                                }}>
+                                    <img
+                                      src={selectedBrand.logo_url ? encodeURI(`${API_BASE}${selectedBrand.logo_url}`) : ''}
+                                      alt={selectedBrand.name}
+                                      className="max-h-12 max-w-full object-contain"
+                                      style={{ filter: (selectedBrand.logo_url || '').toLowerCase().endsWith('.svg') ? 'brightness(0) invert(1)' : 'none' }}
+                                      onError={(e) => {
+                                        // If image fails to load, remove filter and show broken image so user can detect issue
+                                        e.target.style.filter = 'none';
+                                      }}
+                                    />
+                                </div>
+                              </div>
+                            )}
+                            {/* Color Info */}
+                            <div className="mb-2">
+                              <div className="flex items-center gap-2 text-xs">
+                                <span className="font-semibold text-gray-700">Primary:</span>
+                                <div 
+                                  className="w-5 h-5 rounded border border-gray-300 shadow-sm" 
+                                  style={{ backgroundColor: selectedBrand.colors?.primary || '#5074F3' }}
+                                ></div>
+                                <span className="text-gray-600 font-mono">{selectedBrand.colors?.primary || '#5074F3'}</span>
+                              </div>
+                            </div>
+                            <div className="mb-2">
+                              <div className="flex items-center gap-2 text-xs">
+                                <span className="font-semibold text-gray-700">Accent:</span>
+                                <div 
+                                  className="w-5 h-5 rounded border border-gray-300 shadow-sm" 
+                                  style={{ backgroundColor: selectedBrand.colors?.accent || '#2F448D' }}
+                                ></div>
+                                <span className="text-gray-600 font-mono">{selectedBrand.colors?.accent || '#2F448D'}</span>
+                              </div>
+                            </div>
+                            {/* Font Info */}
+                            <div className="text-xs pt-2 border-t border-gray-300">
+                              <div className="flex items-start gap-2">
+                                <span className="font-semibold text-gray-700">Fonts:</span>
+                                <div className="flex-1">
+                                  <div className="text-gray-600">
+                                    <span className="font-medium">Heading:</span> {selectedBrand.fonts?.heading?.replace(/['"]/g, '').split(',')[0] || 'Barlow Condensed'}
+                                  </div>
+                                  <div className="text-gray-600">
+                                    <span className="font-medium">Body:</span> {selectedBrand.fonts?.body?.replace(/['"]/g, '').split(',')[0] || 'DM Sans'}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
                     {/* Allow editing pageSize (width/height) on the selected template */}
                     <div className="mt-3">
                       {(() => {

@@ -122,7 +122,7 @@ PRESET_SHELF_TALKER_MINIMAL_HTML = """
     {% for offer in offers %}
         <div class="shelf-talker">
             <div class="product-name">{{ offer.product_name | upper }}</div>
-            <div class="product-details">{{ offer.brand | upper }} {{ offer.offer_details | upper }}</div>
+            <div class="product-details">{% if not branding.logo_url %}{{ offer.brand | upper }} {% endif %}{{ offer.offer_details | upper }}</div>
             <div class="savings-line">ON MRP</div>
             <div class="save-amount">
                 SAVE <span class="rupee">₹</span> {{ (offer.mrp - offer.price) | int }}/-

@@ -11,6 +11,7 @@ import PDFGenerator from '../components/PDFGenerator';
 export default function Dashboard() {
   const [selectedOffers, setSelectedOffers] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [selectedBrand, setSelectedBrand] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleUploadSuccess = () => {
@@ -19,7 +20,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-600 to-blue-100">
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
         <div className="space-y-8">
@@ -56,7 +57,12 @@ export default function Dashboard() {
                   <span className="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">3</span>
                   <span>Template</span>
                 </div>
-                <TemplateManager onTemplateSelect={setSelectedTemplate} selectedOffers={selectedOffers} />
+                <TemplateManager 
+                  onTemplateSelect={setSelectedTemplate} 
+                  selectedOffers={selectedOffers}
+                  selectedBrand={selectedBrand}
+                  onBrandSelect={setSelectedBrand}
+                />
               </section>
             </div>
           </div>
@@ -70,6 +76,7 @@ export default function Dashboard() {
             <PDFGenerator
               selectedOffers={selectedOffers}
               selectedTemplate={selectedTemplate}
+              selectedBrand={selectedBrand}
             />
           </section>
         </div>
