@@ -294,15 +294,15 @@ class PDFGeneratorService:
 
     def get_pdf_download_url(self, output_filename: str) -> str:
         """
-        Get the relative URL for downloading a PDF.
+        Get the download URL for a PDF.
         
         Args:
             output_filename: PDF filename
             
         Returns:
-            Download URL path
+            Download endpoint URL
         """
-        return f"/downloads/pdfs/{output_filename}"
+        return f"/pdf/download/{output_filename}"
 
 
 # Global PDF generator instance

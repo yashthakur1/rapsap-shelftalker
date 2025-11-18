@@ -220,3 +220,47 @@ async def preview_pdf(
     except Exception as e:
         print(f"✗ Error generating preview: {e}")
         raise HTTPException(status_code=500, detail="Error generating preview")
+
+
+@router.get("/download/{filename}")
+async def download_pdf(filename: str):
+    """
+    Download a generated PDF file.
+    
+    Args:
+        filename: PDF filename (e.g., offers_20251118_160014.pdf)
+        
+    Returns:
+        PDF file as attachment
+    """
+    try:
+        from fastapi.responses import FileResponse
+        import os
+        
+        # Security: only allow alphanumeric, underscore, and dot in filename
+        if not all(c.isalnum() or c in '._-' for c in filename):
+            raise HTTPException(status_code=400, detail="Invalid filename")
+        
+        pdf_service = get_pdf_service()
+        # Get the full path to the PDF
+        pdf_path = os.path.join(str(pdf_service.output_dir), filename)
+        
+        # Security: ensure the file is within the output directory
+        if not os.path.abspath(pdf_path).startswith(os.path.abspath(str(pdf_service.output_dir))):
+            raise HTTPException(status_code=403, detail="Access denied")
+        
+        if not os.path.isfile(pdf_path):
+            raise HTTPException(status_code=404, detail=f"PDF not found: {filename}")
+        
+        print(f"→ Downloading PDF: {pdf_path}")
+        return FileResponse(
+            path=pdf_path,
+            filename=filename,
+            media_type="application/pdf"
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"✗ Error downloading PDF: {e}")
+        raise HTTPException(status_code=500, detail=f"Error downloading PDF: {str(e)}")
