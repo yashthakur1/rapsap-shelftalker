@@ -1,9 +1,30 @@
 services:
   - type: web
+    name: aops-backend
+    env: python
+    plan: starter
+    buildCommand: cd aops/backend && pip install -r requirements.txt
+    startCommand: cd aops/backend && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+    envVars:
+      - key: MONGODB_URI
+        fromDatabase: MONGODB_URI
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+    disk:
+      - name: uploads
+        mountPath: /opt/render/project/aops/backend/uploads
+        sizeGB: 10
+
+  - type: web
     name: aops-frontend
     env: static
     buildCommand: cd aops/frontend && npm install && npm run build
     staticPublishPath: ./aops/frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://aops-backend.onrender.com
     routes:
       - path: /
         destination: /index.html
