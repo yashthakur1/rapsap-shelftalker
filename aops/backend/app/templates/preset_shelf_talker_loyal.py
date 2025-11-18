@@ -17,7 +17,7 @@ PRESET_SHELF_TALKER_LOYAL_HTML = """
         .shelf-wrapper { width: {{ label_width }}; height: {{ label_height }}; position: relative; overflow: hidden; background: white; }
 
         /* brand logo */
-        .brand-logo { position: absolute; left: 12px; top: calc(12mm + 42px); width: 120px; margin-top:-15px; height: 60px; object-fit: contain; }
+        .brand-logo { position: absolute; left: 12px; top: calc(12mm + 42px); width: 120px; height: 60px; object-fit: contain; margin-top: -15px; }
 
         /* left area (product details) */
         .product-name { position: absolute; left: 12px; top: 12px; color: #030303; font-size: 14px; font-family: {{ branding.fonts.body if branding.fonts else "'DM Sans'" }}, Arial, sans-serif; font-weight: 500; line-height: 16.8px; max-width: calc(60% - 12px); word-wrap: break-word; }
@@ -48,14 +48,12 @@ PRESET_SHELF_TALKER_LOYAL_HTML = """
         <div class="rupee-symbol">₹</div>
         <div class="price-major">{{ offer.price | int }}</div>
         <div class="blue-band"></div>
-        {% if branding.logo_url %}
-        {% if 'svg' in (branding.logo_url | lower) %}
-        <img src="{{ branding.logo_url }}" alt="Brand Logo" class="brand-logo" style="filter: brightness(0) invert(1);" />
+        {% set logo_src = (branding.logo_data if branding.logo_data else (branding.logo_url if branding.logo_url else '')) %}
+        {% if logo_src %}
+            {% set is_svg = 'svg' in (logo_src | lower) %}
+            <img src="{{ logo_src }}" alt="Brand Logo" class="brand-logo" {% if is_svg %}style="filter: brightness(0) invert(1);"{% endif %} />
         {% else %}
-        <img src="{{ branding.logo_url }}" alt="Brand Logo" class="brand-logo" />
-        {% endif %}
-        {% else %}
-        <div class="brand-badge">{{ offer.brand|upper if offer.brand else 'LOYAL' }}</div>
+            <div class="brand-badge">{{ offer.brand|upper if offer.brand else 'LOYAL' }}</div>
         {% endif %}
         {% if offer.mrp and offer.price %}
         <div class="percent">

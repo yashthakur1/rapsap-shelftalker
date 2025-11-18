@@ -131,7 +131,7 @@ PRESET_SHELF_TALKER_BRANDED_HTML = """
         }
 
         .brand-logo-img {
-        margin-top: -15px;
+            margin-top: -15px;
             width: 120px;
             height: 60px;
             object-fit: contain;
@@ -171,21 +171,19 @@ PRESET_SHELF_TALKER_BRANDED_HTML = """
         <div class="shelf-wrapper">
             <div class="left-section">
                 <div class="product-name">{{ offer.product_name }}</div>
-                <div class="product-details">{% if not branding.logo_url %}{{ offer.brand }} {% endif %}{{ offer.offer_details }}</div>
+                <div class="product-details">{% if not (branding.logo_url or branding.logo_data) %}{{ offer.brand }} {% endif %}{{ offer.offer_details }}</div>
                 <div class="price-row">
                     <div class="price-main"><span class="rupee">₹</span>{{ (offer.mrp - offer.price)|int }}<sup style="font-size:9pt">OFF</sup></div>
                     <div class="price-label">ON MRP</div>
                 </div>
             </div>
             <div class="brand-section">
-                {% if branding.logo_url %}
-                {% if 'svg' in (branding.logo_url | lower) %}
-                <img src="{{ branding.logo_url }}" alt="Brand Logo" class="brand-logo-img" style="filter: brightness(0) invert(1);" />
+                {% set logo_src = (branding.logo_data if branding.logo_data else (branding.logo_url if branding.logo_url else '')) %}
+                {% if logo_src %}
+                    {% set is_svg = 'svg' in (logo_src | lower) %}
+                    <img src="{{ logo_src }}" alt="Brand Logo" class="brand-logo-img" {% if is_svg %}style="filter: brightness(0) invert(1);"{% endif %} />
                 {% else %}
-                <img src="{{ branding.logo_url }}" alt="Brand Logo" class="brand-logo-img" />
-                {% endif %}
-                {% else %}
-                <div class="brand-logo">{{ (offer.brand|upper) if offer.brand else 'LOYAL' }}</div>
+                    <div class="brand-logo">{{ (offer.brand|upper) if offer.brand else 'LOYAL' }}</div>
                 {% endif %}
                 {% if offer.mrp and offer.price %}
                 <div class="discount-badge">{{ ((offer.mrp - offer.price) / offer.mrp * 100)|int }}%</div>

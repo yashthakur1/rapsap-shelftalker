@@ -243,17 +243,17 @@ export default function TemplateManager({ onTemplateSelect, selectedOffers = [],
                         {selectedBrand && (
                           <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
                             {/* Logo Preview */}
-                            {selectedBrand.logo_url && (
+                            {(selectedBrand.logo_data || selectedBrand.logo_url) && (
                               <div className="mb-3 pb-3 border-b border-gray-300">
                                 <span className="text-xs font-semibold text-gray-700 block mb-2">Logo Preview:</span>
                                 <div className="bg-gradient-to-r from-blue-500 to-blue-700 p-3 rounded flex items-center justify-center" style={{
                                   background: `linear-gradient(180deg, ${selectedBrand.colors?.primary || '#5074F3'} 0%, ${selectedBrand.colors?.accent || '#2F448D'} 100%)`
                                 }}>
                                     <img
-                                      src={selectedBrand.logo_url ? encodeURI(`${API_BASE}${selectedBrand.logo_url}`) : ''}
+                                      src={selectedBrand.logo_data ? selectedBrand.logo_data : encodeURI(`${API_BASE}${selectedBrand.logo_url}`)}
                                       alt={selectedBrand.name}
                                       className="max-h-12 max-w-full object-contain"
-                                      style={{ filter: (selectedBrand.logo_url || '').toLowerCase().endsWith('.svg') ? 'brightness(0) invert(1)' : 'none' }}
+                                      style={{ filter: ((selectedBrand.logo_data && selectedBrand.logo_data.toLowerCase().startsWith('data:image/svg+xml')) || (selectedBrand.logo_url || '').toLowerCase().endsWith('.svg')) ? 'brightness(0) invert(1)' : 'none' }}
                                       onError={(e) => {
                                         // If image fails to load, remove filter and show broken image so user can detect issue
                                         e.target.style.filter = 'none';

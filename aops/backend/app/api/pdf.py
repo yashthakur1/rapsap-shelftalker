@@ -181,6 +181,9 @@ async def preview_pdf(
         if not isinstance(layout_options, dict):
             layout_options = {"pageSize": layout_options}
 
+        # Debug: log selected template and layout options
+        print(f"→ preview_pdf: template_id={template_id}, template_name={template.get('name') if template else 'N/A'}, layout_options={layout_options}")
+
         pdf_service = get_pdf_service()
         page_size_info = pdf_service._resolve_page_size(layout_options.get("pageSize"))
 

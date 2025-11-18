@@ -72,6 +72,25 @@ BRAND_CONFIGS = {
             "body": "'Arial', 'Helvetica', sans-serif"
         }
     }
+    ,
+    "loyal": {
+        "id": "loyal",
+        "name": "Loyal",
+        "logo_url": None,
+        "logo_data": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='100%25' height='100%25' fill='%23000000'/><rect x='10' y='60' width='70' height='14' fill='%235074F3'/><rect x='10' y='80' width='40' height='6' fill='%235074F3'/><text x='110' y='120' font-family='Arial' font-size='120' fill='%23ffffff'>r</text></svg>",
+        "colors": {
+            "primary": "#5074F3",
+            "accent": "#2F448D",
+            "text": "#000000",
+            "textLight": "#FFFFFF",
+            "background": "#FFFFFF",
+            "backgroundGray": "#C5C8CD"
+        },
+        "fonts": {
+            "heading": "'Barlow Condensed', Arial, sans-serif",
+            "body": "'DM Sans', Arial, sans-serif"
+        }
+    }
 }
 
 def get_brand_config(brand_name: str = "default") -> dict:
