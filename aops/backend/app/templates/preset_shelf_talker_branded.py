@@ -170,11 +170,11 @@ PRESET_SHELF_TALKER_BRANDED_HTML = """
         {% for offer in offers %}
         <div class="shelf-wrapper">
             <div class="left-section">
-                <div class="product-name">{{ offer.product_name }}</div>
-                <div class="product-details">{% if not (branding.logo_url or branding.logo_data) %}{{ offer.brand }} {% endif %}{{ offer.offer_details }}</div>
+                <div class="product-name">{{ offer.item_name }}</div>
+                <div class="product-details">{% if not (branding.logo_url or branding.logo_data) %}{{ offer.brand }} • {% endif %}{{ offer.categories }}</div>
                 <div class="price-row">
-                    <div class="price-main"><span class="rupee">₹</span>{{ (offer.mrp - offer.price)|int }}<sup style="font-size:9pt">OFF</sup></div>
-                    <div class="price-label">ON MRP</div>
+                    <div class="price-main"><span class="rupee">₹</span>{{ offer.savings|int }}<sup style="font-size:9pt">OFF</sup></div>
+                    <div class="price-label">ON MRP ₹{{ offer.mrp|int }}</div>
                 </div>
             </div>
             <div class="brand-section">
@@ -185,9 +185,9 @@ PRESET_SHELF_TALKER_BRANDED_HTML = """
                 {% else %}
                     <div class="brand-logo">{{ (offer.brand|upper) if offer.brand else 'LOYAL' }}</div>
                 {% endif %}
-                {% if offer.mrp and offer.price %}
-                <div class="discount-badge">{{ ((offer.mrp - offer.price) / offer.mrp * 100)|int }}%</div>
-                <div class="discount-label">additional savings</div>
+                {% if offer.savings %}
+                <div class="discount-badge">{{ ((offer.savings / offer.mrp) * 100)|int }}%</div>
+                <div class="discount-label">savings</div>
                 {% endif %}
             </div>
         </div>
