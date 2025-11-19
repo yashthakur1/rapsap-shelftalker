@@ -27,12 +27,26 @@ export default function Step1Upload({ onUploadSuccess }) {
 
     setUploading(true);
     try {
+      console.log('Uploading file:', file.name);
       const response = await uploadCSV(file);
-      setUploadedCount(response.inserted_count);
-      toast.success(`Successfully uploaded ${response.inserted_count} items`);
-      onUploadSuccess(response);
+      console.log('Upload response:', response);
+
+      if (response.status === 'success') {
+        setUploadedCount(response.inserted_count);
+        toast.success(`Successfully uploaded ${response.inserted_count} items`);
+        onUploadSuccess(response);
+      } else {
+        throw new Error('Upload failed - unexpected response format');
+      }
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to upload CSV');
+      console.error('Upload error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response,
+        data: error.response?.data
+      });
+      const errorMessage = error.response?.data?.detail || error.message || 'Failed to upload CSV';
+      toast.error(errorMessage);
     } finally {
       setUploading(false);
     }
