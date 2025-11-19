@@ -170,10 +170,10 @@ PRESET_SHELF_TALKER_BRANDED_HTML = """
         {% for offer in offers %}
         <div class="shelf-wrapper">
             <div class="left-section">
-                <div class="product-name">{{ offer.item_name }}</div>
-                <div class="product-details">{% if not (branding.logo_url or branding.logo_data) %}{{ offer.brand }} • {% endif %}{{ offer.categories }}</div>
+                <div class="product-name">{{ offer.product_name }}</div>
+                <div class="product-details">{% if not (branding.logo_url or branding.logo_data) %}{{ offer.brand }} • {% endif %}{{ offer.offer_details }}</div>
                 <div class="price-row">
-                    <div class="price-main"><span class="rupee">₹</span>{{ offer.savings|int }}<sup style="font-size:9pt">OFF</sup></div>
+                    <div class="price-main"><span class="rupee">₹</span>{{ (offer.mrp - offer.price)|int }}<sup style="font-size:9pt">OFF</sup></div>
                     <div class="price-label">ON MRP ₹{{ offer.mrp|int }}</div>
                 </div>
             </div>
@@ -185,8 +185,8 @@ PRESET_SHELF_TALKER_BRANDED_HTML = """
                 {% else %}
                     <div class="brand-logo">{{ (offer.brand|upper) if offer.brand else 'LOYAL' }}</div>
                 {% endif %}
-                {% if offer.savings %}
-                <div class="discount-badge">{{ ((offer.savings / offer.mrp) * 100)|int }}%</div>
+                {% if offer.mrp and offer.price %}
+                <div class="discount-badge">{{ (((offer.mrp - offer.price) / offer.mrp) * 100)|int }}%</div>
                 <div class="discount-label">savings</div>
                 {% endif %}
             </div>
@@ -199,12 +199,14 @@ PRESET_SHELF_TALKER_BRANDED_HTML = """
 
 PRESET_SHELF_TALKER_BRANDED = {
     "name": "Shelf Talker - Branded",
-    "description": "Modern shelf talker with brand accent bar (9.5cm x 4cm, landscape)",
+    "description": "Modern shelf talker with brand accent bar (4 per A4 page)",
     "html_content": PRESET_SHELF_TALKER_BRANDED_HTML,
     "is_preset": True,
     "layout_options": {
-        "pageSize": {"width": "95mm", "height": "40mm"},
-        "perPage": 1,
-        "orientation": "landscape"
+        "pageSize": "A4",
+        "perPage": 4,
+        "orientation": "portrait",
+        "tagWidth": "95mm",
+        "tagHeight": "40mm"
     }
 }

@@ -38,7 +38,7 @@ async def upload_csv(file: UploadFile = File(...)):
     Upload and parse CSV file containing offers.
 
     Expected CSV columns:
-    Categories, Brand, Item Name, MRP, Rapsap Price, Savings
+    product_id, product_name, brand, offer_type, offer_details, price, mrp, valid_till
 
     Returns: { inserted_count: int, preview: list[Offer] }
     """
@@ -56,12 +56,14 @@ async def upload_csv(file: UploadFile = File(...)):
         for row in csv_reader:
             try:
                 offer = {
-                    "categories": row.get("Categories", "").strip(),
-                    "brand": row.get("Brand", "").strip(),
-                    "item_name": row.get("Item Name", "").strip(),
-                    "mrp": float(row.get("MRP", 0)),
-                    "rapsap_price": float(row.get("Rapsap Price", 0)),
-                    "savings": float(row.get("Savings", 0)),
+                    "product_id": row.get("product_id", "").strip(),
+                    "product_name": row.get("product_name", "").strip(),
+                    "brand": row.get("brand", "").strip(),
+                    "offer_type": row.get("offer_type", "").strip(),
+                    "offer_details": row.get("offer_details", "").strip(),
+                    "price": float(row.get("price", 0)),
+                    "mrp": float(row.get("mrp", 0)),
+                    "valid_till": row.get("valid_till", "").strip(),
                     "custom_fields": {},
                     "created_at": datetime.utcnow(),
                     "updated_at": datetime.utcnow()

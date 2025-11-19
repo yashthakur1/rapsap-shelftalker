@@ -214,8 +214,8 @@ class PDFGeneratorService:
         Normalize page size information for both PDF options and template styling.
         Returns dict with keys `pdf_size`, `css`, `label_width`, `label_height`.
         """
-        default_width = "120mm"
-        default_height = "60mm"
+        default_width = "95mm"
+        default_height = "40mm"
         label_width = default_width
         label_height = default_height
         if isinstance(page_size, dict):
@@ -230,6 +230,9 @@ class PDFGeneratorService:
         else:
             css_value = page_size or "A4"
             pdf_size = page_size or "A4"
+            # For A4 and standard page sizes, use the tag dimensions from layout_options
+            label_width = default_width
+            label_height = default_height
 
         return {
             "pdf_size": pdf_size,

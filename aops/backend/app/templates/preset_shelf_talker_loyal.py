@@ -44,9 +44,9 @@ PRESET_SHELF_TALKER_LOYAL_HTML = """
 <body>
     {% for offer in offers %}
     <div class="shelf-wrapper">
-        <div class="product-name">{{ offer.item_name | default('') }}</div>
+        <div class="product-name">{{ offer.product_name | default('') }}</div>
         <div class="rupee-symbol">₹</div>
-        <div class="price-major">{{ offer.rapsap_price | int }}</div>
+        <div class="price-major">{{ offer.price | int }}</div>
         <div class="blue-band"></div>
         {% set logo_src = (branding.logo_data if branding.logo_data else (branding.logo_url if branding.logo_url else '')) %}
         {% if logo_src %}
@@ -55,9 +55,9 @@ PRESET_SHELF_TALKER_LOYAL_HTML = """
         {% else %}
             <div class="brand-badge">{{ offer.brand|upper if offer.brand else 'LOYAL' }}</div>
         {% endif %}
-        {% if offer.savings %}
+        {% if offer.mrp and offer.price %}
         <div class="percent">
-            <div class="value">{{ ((offer.savings / offer.mrp) * 100) | int }}%</div>
+            <div class="value">{{ (((offer.mrp - offer.price) / offer.mrp) * 100) | int }}%</div>
             <div class="label">Savings</div>
         </div>
         {% endif %}
@@ -69,12 +69,14 @@ PRESET_SHELF_TALKER_LOYAL_HTML = """
 
 PRESET_SHELF_TALKER_LOYAL = {
     "name": "Shelf Talker - Loyal",
-    "description": "Compact, branded shelf talker with large price and blue accent bar",
+    "description": "Compact, branded shelf talker with large price and blue accent bar (4 per A4 page)",
     "html_content": PRESET_SHELF_TALKER_LOYAL_HTML,
     "is_preset": True,
     "layout_options": {
-        "pageSize": {"width": "95mm", "height": "40mm"},
-        "perPage": 1,
-        "orientation": "landscape"
+        "pageSize": "A4",
+        "perPage": 4,
+        "orientation": "portrait",
+        "tagWidth": "95mm",
+        "tagHeight": "40mm"
     }
 }

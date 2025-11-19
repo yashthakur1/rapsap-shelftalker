@@ -121,11 +121,11 @@ PRESET_SHELF_TALKER_MINIMAL_HTML = """
     <div class="page-layout">
     {% for offer in offers %}
         <div class="shelf-talker">
-            <div class="product-name">{{ offer.item_name | upper }}</div>
-            <div class="product-details">{% if not (branding.logo_url or branding.logo_data) %}{{ offer.brand | upper }} • {% endif %}{{ offer.categories | upper }}</div>
+            <div class="product-name">{{ offer.product_name | upper }}</div>
+            <div class="product-details">{% if not (branding.logo_url or branding.logo_data) %}{{ offer.brand | upper }} • {% endif %}{{ offer.offer_details | upper }}</div>
             <div class="savings-line">ON MRP ₹{{ offer.mrp | int }}</div>
             <div class="save-amount">
-                SAVE <span class="rupee">₹</span> {{ offer.savings | int }}/-
+                SAVE <span class="rupee">₹</span> {{ (offer.mrp - offer.price) | int }}/-
             </div>
         </div>
     {% endfor %}
@@ -136,12 +136,14 @@ PRESET_SHELF_TALKER_MINIMAL_HTML = """
 
 PRESET_SHELF_TALKER_MINIMAL = {
     "name": "Shelf Talker - Minimal",
-    "description": "Clean shelf talker design for 9.5cm x 4cm labels (landscape)",
+    "description": "Clean shelf talker design (4 per A4 page)",
     "html_content": PRESET_SHELF_TALKER_MINIMAL_HTML,
     "is_preset": True,
     "layout_options": {
-        "pageSize": {"width": "95mm", "height": "40mm"},
-        "perPage": 1,
-        "orientation": "landscape"
+        "pageSize": "A4",
+        "perPage": 4,
+        "orientation": "portrait",
+        "tagWidth": "95mm",
+        "tagHeight": "40mm"
     }
 }

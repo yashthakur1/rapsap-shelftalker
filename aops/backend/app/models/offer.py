@@ -10,12 +10,14 @@ from datetime import datetime
 
 class OfferBase(BaseModel):
     """Base offer model with common fields"""
-    categories: str  # Categories column from CSV
+    product_id: str  # Product ID from CSV
+    product_name: str  # Product Name from CSV
     brand: str  # Brand column from CSV
-    item_name: str  # Item Name column from CSV
+    offer_type: Optional[str] = None  # Offer Type from CSV
+    offer_details: Optional[str] = None  # Offer Details from CSV
+    price: float  # Sale price from CSV
     mrp: float  # MRP column from CSV
-    rapsap_price: float  # Rapsap Price column from CSV
-    savings: float  # Savings column from CSV
+    valid_till: Optional[str] = None  # Expiry date from CSV
     custom_fields: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 
@@ -34,12 +36,14 @@ class Offer(OfferBase):
         populate_by_name = True
         json_schema_extra = {
             "example": {
-                "categories": "Groceries",
-                "brand": "TechBrand",
-                "item_name": "Wireless Headphones",
-                "mrp": 6999,
-                "rapsap_price": 4999,
-                "savings": 2000,
+                "product_id": "PRD-001",
+                "product_name": "Natures Bake WW MG Burger Bun",
+                "brand": "Nils Natures bake",
+                "offer_type": "Discount",
+                "offer_details": "Save ₹9",
+                "price": 51,
+                "mrp": 60,
+                "valid_till": "2025-12-31",
                 "custom_fields": {}
             }
         }
