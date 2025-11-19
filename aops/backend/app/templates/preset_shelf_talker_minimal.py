@@ -12,7 +12,7 @@ PRESET_SHELF_TALKER_MINIMAL_HTML = """
     <title>Minimal Shelf Talkers</title>
     <style>
         @page {
-            size: {{ page_size_css }};
+            size: A4;
             margin: 0;
         }
 
@@ -45,10 +45,10 @@ PRESET_SHELF_TALKER_MINIMAL_HTML = """
         .page-layout {
             width: 100%;
             display: flex;
-            flex-wrap: wrap;
-            gap: 4mm;
+            flex-direction: column;
+            gap: 10mm;
             justify-content: flex-start;
-            align-content: flex-start;
+            align-items: center;
         }
 
         .shelf-talker {

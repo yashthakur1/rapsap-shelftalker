@@ -12,7 +12,7 @@ PRESET_SHELF_TALKER_BRANDED_HTML = """
     <title>Branded Shelf Talkers</title>
     <style>
         @page {
-            size: {{ page_size_css }};
+            size: A4;
             margin: 0;
         }
 
@@ -46,8 +46,8 @@ PRESET_SHELF_TALKER_BRANDED_HTML = """
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 4mm;
-            justify-content: center;
+            gap: 10mm;
+            justify-content: flex-start;
             align-items: center;
         }
 
