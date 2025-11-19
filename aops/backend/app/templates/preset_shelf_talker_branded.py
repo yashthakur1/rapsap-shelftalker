@@ -57,7 +57,6 @@ PRESET_SHELF_TALKER_BRANDED_HTML = """
             box-sizing: border-box;
             border: 0;
             overflow: hidden;
-            page-break-after: always;
             break-inside: avoid;
             display: flex;
             background: #fff;
