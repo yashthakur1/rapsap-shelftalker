@@ -15,7 +15,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
         <div className="flex items-center justify-between">
           {/* Logo & Title */}
-          <Link to="/dashboard" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+          <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
             <div className="text-3xl">🏷️</div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-800">AOPS</h1>
           </Link>
@@ -23,8 +23,8 @@ export default function Navbar() {
           {/* Navigation Links */}
           <nav className="flex items-center space-x-6">
             <Link
-              to="/dashboard"
-              className={`pb-2 font-semibold transition-colors ${isActive('/dashboard')}`}
+              to="/"
+              className={`pb-2 font-semibold transition-colors ${isActive('/')}`}
             >
               Dashboard
             </Link>
