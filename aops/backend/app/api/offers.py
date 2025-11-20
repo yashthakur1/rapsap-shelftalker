@@ -47,26 +47,110 @@ async def upload_csv(file: UploadFile = File(...)):
         content = await file.read()
         csv_text = content.decode("utf-8")
         csv_reader = csv.DictReader(io.StringIO(csv_text))
-        
+
         if not csv_reader.fieldnames:
             raise HTTPException(status_code=400, detail="Invalid CSV format")
-        
+
+        # Helper: normalize header names to a canonical key
+        def normalize_key(k: str):
+            return (k or '').strip().lower().replace('-', ' ').replace('_', ' ')
+
+        # Mapping of possible header names to our internal field names
+        header_map = {
+            'product id': 'product_id',
+            'id': 'product_id',
+            'sku': 'product_id',
+            'product_id': 'product_id',
+
+            'product name': 'product_name',
+            'productname': 'product_name',
+            'item name': 'product_name',
+            'itemname': 'product_name',
+            'name': 'product_name',
+
+            'brand': 'brand',
+
+            'offer type': 'offer_type',
+            'offertype': 'offer_type',
+            'offer': 'offer_type',
+
+            'offer details': 'offer_details',
+            'offer_details': 'offer_details',
+            'details': 'offer_details',
+            'savings': 'offer_details',
+
+            'price': 'price',
+            'rapsap price': 'price',
+            'sale price': 'price',
+
+            'mrp': 'mrp',
+
+            'valid till': 'valid_till',
+            'valid_till': 'valid_till',
+            'expiry': 'valid_till',
+            'expiry date': 'valid_till'
+        }
+
+        # Build normalized header lookup for each CSV column
+        normalized_headers = {}
+        for h in csv_reader.fieldnames:
+            nk = normalize_key(h)
+            normalized_headers[h] = header_map.get(nk)
+
+        # Simple slug generator for missing product_id
+        def slugify(text: str):
+            if not text:
+                return ''
+            s = ''.join(c if c.isalnum() or c.isspace() else ' ' for c in text)
+            s = '-'.join(s.lower().split())
+            return s[:60]
+
         # Parse offers
         offers = []
+        auto_idx = 1
         for row in csv_reader:
             try:
+                mapped = {}
+                custom = {}
+                # Map known headers
+                for raw_h, value in row.items():
+                    val = (value or '').strip()
+                    target = normalized_headers.get(raw_h)
+                    if target:
+                        mapped[target] = val
+                    else:
+                        # Keep leftover columns in custom_fields using their raw header
+                        if val != '':
+                            custom[raw_h.strip()] = val
+
+                # Ensure required fields exist; generate product_id if missing
+                product_name = mapped.get('product_name') or custom.get('Item Name') or ''
+                product_id = mapped.get('product_id') or custom.get('product_id') or slugify(product_name) or f'auto-{auto_idx}'
+                if product_id.startswith('auto-'):
+                    auto_idx += 1
+
+                # Parse numeric fields safely
+                def to_float(x):
+                    try:
+                        return float(str(x).replace(',', '').strip()) if str(x).strip() != '' else 0.0
+                    except:
+                        return 0.0
+
+                price = to_float(mapped.get('price') or custom.get('Rapsap Price') or mapped.get('rapsap price'))
+                mrp = to_float(mapped.get('mrp') or custom.get('MRP') or mapped.get('MRP'))
+
                 offer = {
-                    "product_id": row.get("product_id", "").strip(),
-                    "product_name": row.get("product_name", "").strip(),
-                    "brand": row.get("brand", "").strip(),
-                    "offer_type": row.get("offer_type", "").strip(),
-                    "offer_details": row.get("offer_details", "").strip(),
-                    "price": float(row.get("price", 0)),
-                    "mrp": float(row.get("mrp", 0)),
-                    "valid_till": row.get("valid_till", "").strip(),
-                    "custom_fields": {},
-                    "created_at": datetime.utcnow(),
-                    "updated_at": datetime.utcnow()
+                    'product_id': product_id,
+                    'product_name': mapped.get('product_name') or product_name or product_id,
+                    'brand': mapped.get('brand') or custom.get('Brand') or '',
+                    'offer_type': mapped.get('offer_type') or '',
+                    'offer_details': mapped.get('offer_details') or custom.get('Savings') or '',
+                    'price': price,
+                    'mrp': mrp,
+                    'valid_till': mapped.get('valid_till') or '',
+                    'custom_fields': custom,
+                    'created_at': datetime.utcnow(),
+                    'updated_at': datetime.utcnow()
                 }
 
                 # Validate with Pydantic model

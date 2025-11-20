@@ -444,40 +444,7 @@ export default function TemplateManager({ onTemplateSelect, selectedOffers = [],
             </div>
           )}
 
-          {/* Upload Custom Template */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Upload Custom Template</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Upload a ZIP file containing your HTML template and CSS files.
-            </p>
-            
-            <label className="block">
-              <input
-                type="file"
-                accept=".zip"
-                onChange={handleTemplateUpload}
-                disabled={uploading}
-                className="hidden"
-              />
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-gray-400 transition-colors">
-                {uploading ? (
-                  <div className="text-gray-600">⏳ Uploading...</div>
-                ) : (
-                  <>
-                    <div className="text-gray-600 font-semibold mb-1">📦 Choose ZIP File</div>
-                    <div className="text-xs text-gray-500">or drag and drop</div>
-                  </>
-                )}
-              </div>
-            </label>
-          </div>
 
-          {/* Template Info */}
-          <div className="bg-gray-50 border-l-4 border-gray-400 p-4 mt-6">
-            <p className="text-xs text-gray-600">
-              <strong>💡 Tip:</strong> Your template should use Jinja2 syntax. Use {'{{ offer.field }}'} to reference offer data.
-            </p>
-          </div>
         </>
       )}
     </div>

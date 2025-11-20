@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { uploadCSV, clearAllOffers } from '../services/api';
 
@@ -11,6 +12,7 @@ export default function UploadCSV({ onUploadSuccess }) {
   const [loading, setLoading] = useState(false);
   const [fileName, setFileName] = useState('');
   const [clearing, setClearing] = useState(false);
+  const navigate = useNavigate();
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files?.[0];
@@ -37,9 +39,12 @@ export default function UploadCSV({ onUploadSuccess }) {
       setFile(null);
       setFileName('');
       
-      // Notify parent component
+      // Notify parent component or navigate to product selection when used as first screen
       if (onUploadSuccess) {
         onUploadSuccess(response);
+      } else {
+        // default behaviour for standalone upload page: go to product selection
+        navigate('/product-selection', { replace: true });
       }
     } catch (error) {
       toast.error(`✗ Upload failed: ${error.message}`);
@@ -114,13 +119,14 @@ export default function UploadCSV({ onUploadSuccess }) {
         </div>
 
         {/* CSV Format Info */}
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
-          <p className="text-sm font-semibold text-gray-700 mb-2">Expected CSV Columns:</p>
-          <code className="text-xs text-gray-600 block whitespace-pre-wrap">
-            product_id, product_name, brand, offer_type,{'\n'}
-            offer_details, price, mrp, valid_till
-          </code>
-        </div>
+          <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
+            <p className="text-sm font-semibold text-gray-700 mb-2">CSV Format (flexible):</p>
+            <p className="text-xs text-gray-600 mb-2">Supported headers (case-insensitive):</p>
+            <code className="text-xs text-gray-600 block whitespace-pre-wrap">
+              Examples: Categories, Brand, Item Name, MRP, Rapsap Price, Savings
+            </code>
+            <p className="text-xs text-gray-600 mt-2">We also accept columns named: product_id, product_name, brand, price, mrp, offer_type, offer_details, valid_till. Unrecognized columns will be preserved as custom fields.</p>
+          </div>
 
         {/* Submit Button */}
         <button

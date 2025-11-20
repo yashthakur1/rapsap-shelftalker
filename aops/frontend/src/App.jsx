@@ -2,8 +2,10 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
-import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
+import UploadCSV from './components/UploadCSV';
+import ProductSelection from './pages/ProductSelection';
+import Templates from './pages/Templates';
 
 /**
  * Main App Component
@@ -15,8 +17,10 @@ function App() {
       <Navbar />
       <div className="bg-gray-50">
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/" element={<Navigate to="/upload" replace />} />
+          <Route path="/upload" element={<UploadCSV />} />
+          <Route path="/product-selection" element={<ProductSelection />} />
+          <Route path="/templates" element={<Templates />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </div>
