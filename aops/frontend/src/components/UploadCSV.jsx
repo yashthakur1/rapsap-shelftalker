@@ -85,6 +85,10 @@ export default function UploadCSV({ onUploadSuccess }) {
     }
   };
 
+  const handleSeeProducts = () => {
+    navigate('/product-selection', { replace: true });
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-md p-6 md:p-8">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">Upload Offers CSV</h2>
@@ -153,6 +157,22 @@ export default function UploadCSV({ onUploadSuccess }) {
           }`}
         >
           {clearing ? '⏳ Clearing...' : '🗑️ Clear All Offers'}
+        </button>
+
+        {/* Divider */}
+        <div className="flex items-center gap-4 my-6">
+          <div className="flex-1 h-px bg-gray-300"></div>
+          <span className="text-gray-600 text-sm">or</span>
+          <div className="flex-1 h-px bg-gray-300"></div>
+        </div>
+
+        {/* See Products Button */}
+        <button
+          type="button"
+          onClick={handleSeeProducts}
+          className="w-full py-3 rounded-lg font-bold text-white bg-green-600 hover:bg-green-700 hover:shadow-lg transition-all"
+        >
+          👀 See Products
         </button>
       </form>
     </div>

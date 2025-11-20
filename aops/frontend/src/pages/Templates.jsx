@@ -12,6 +12,10 @@ export default function Templates() {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [selectedBrand, setSelectedBrand] = useState(null);
 
+  const handleBack = () => {
+    navigate('/product-selection', { state: { selectedOffers } });
+  };
+
   // If user navigated here without selected offers, send them back to upload
   if (!selectedOffers || selectedOffers.length === 0) {
     // keep a small UX: show a message and nav button
@@ -49,6 +53,16 @@ export default function Templates() {
               selectedBrand={selectedBrand}
             />
           </div>
+        </div>
+
+        {/* Back Button */}
+        <div className="mt-8 flex justify-start">
+          <button
+            onClick={handleBack}
+            className="px-6 py-3 bg-gray-400 text-white rounded-lg font-semibold hover:bg-gray-500 transition-all"
+          >
+            ← Back to Products
+          </button>
         </div>
       </main>
     </div>
